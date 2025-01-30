@@ -1,17 +1,21 @@
 package commandparser
 
 import (
+	"file-manager/internal/colors"
 	"file-manager/internal/utils"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 var (
-	commands = map[string]func(commandInput CommandInput) (wd string, err error){
+	MAX_FILE_SIZE_TO_READ = 5120
+	commands              = map[string]func(commandInput CommandInput) (wd string, err error){
 		"od":   OpenDir,
+		"of":   OpenFile,
 		"exit": Exit,
 		"back": BackDir,
 	}
@@ -66,12 +70,48 @@ func OpenDir(commandInput CommandInput) (wd string, err error) {
 }
 
 func Exit(commandInput CommandInput) (wd string, err error) {
-	fmt.Println("Bye-bye!")
+	utils.ClearScreen()
 	os.Exit(1)
 	return "", nil
 }
 
-func BackDir(CommandInput CommandInput) (wd string, err error) {
-	wd = filepath.Join(CommandInput.cwd, "..")
+func BackDir(commandInput CommandInput) (wd string, err error) {
+	wd = filepath.Join(commandInput.cwd, "..")
 	return wd, nil
+}
+
+func OpenFile(commandInput CommandInput) (wd string, err error) {
+	index := commandInput.index
+	if index > len(*commandInput.catalog.Files) || index < 1 {
+		return commandInput.cwd, fmt.Errorf("invalid index of file")
+	}
+	file := (*commandInput.catalog.Files)[index-1]
+
+	info, err := file.Info()
+	if err != nil {
+		return commandInput.cwd, fmt.Errorf("impossible to read")
+	}
+	if info.Size() > int64(MAX_FILE_SIZE_TO_READ) {
+		return commandInput.cwd, fmt.Errorf("max file size reached -> %d bytes", MAX_FILE_SIZE_TO_READ)
+	}
+	filePath := filepath.Join(commandInput.cwd, file.Name())
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return commandInput.cwd, fmt.Errorf("unexpected error while readind file")
+	}
+
+	lines := strings.Split(string(data), "\n")
+
+	utils.ClearScreen()
+	fmt.Print(colors.Green, file.Name(), colors.Reset, "\n")
+	fmt.Print(colors.LightBlue, "--------- READ ONLY ---------\n")
+	for i, line := range lines {
+		fmt.Print(colors.Purple, fmt.Sprintf("%3d  ", i+1), colors.Reset, line, "\n")
+	}
+
+	var exitSignal string
+	fmt.Print("\n", colors.LightBlue, colors.Underline, "Use `Enter` to exit read mode", colors.Reset, "\n")
+	fmt.Scanln(&exitSignal)
+
+	return commandInput.cwd, nil
 }

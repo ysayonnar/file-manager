@@ -1,9 +1,9 @@
 package window
 
 import (
-	"bufio"
 	"file-manager/internal/colors"
 	commandparser "file-manager/internal/command-parser"
+	"file-manager/internal/utils"
 	"fmt"
 	"os"
 )
@@ -51,8 +51,8 @@ func RenderWindow(cwd string) error {
 		fmt.Scanln(&command)
 		cwd, commandError = commandparser.ParseCommand(cwd, command, catalog)
 
-		clearScreen()
-		clearStdin()
+		utils.ClearScreen()
+		utils.ClearStdin()
 	}
 
 	return nil
@@ -108,19 +108,4 @@ func ShowDirs(cwd string) (*commandparser.Catalog, error) {
 	}
 
 	return &commandparser.Catalog{Files: &files, Dirs: &dirs}, nil
-}
-
-func clearStdin() {
-	reader := bufio.NewReader(os.Stdin)
-	for reader.Buffered() > 0 {
-		reader.ReadByte()
-	}
-}
-
-func clearScreen() {
-	fmt.Print("\033[H\033[2J")
-}
-
-func clearLastLine() {
-	fmt.Print("\033[F\033[K")
 }
