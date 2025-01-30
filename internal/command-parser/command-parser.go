@@ -16,12 +16,13 @@ var (
 	MAX_FILE_SIZE_TO_READ = 5120
 	PATH_TO_VSCODE        = `C:\Users\ysayo\AppData\Local\Programs\Microsoft VS Code\Code.exe`
 	commands              = map[string]func(commandInput CommandInput) (wd string, err error){
-		"od":    OpenDir,    // opens directory
-		"of":    OpenFile,   //opens file
-		"exit":  Exit,       // exit file-manager
-		"back":  BackDir,    // back on tree, as `cd ..`
-		"code":  LaunchCode, // launch vs code in the cwd
-		"mkdir": MakeDir,
+		"od":     OpenDir,    // opens directory
+		"of":     OpenFile,   //opens file
+		"exit":   Exit,       // exit file-manager
+		"back":   BackDir,    // back on tree, as `cd ..`
+		"code":   LaunchCode, // launch vs code in the cwd
+		"mkdir":  MakeDir,
+		"mkfile": MakeFile,
 	}
 )
 
@@ -158,4 +159,21 @@ func MakeDir(commandInput CommandInput) (wd string, err error) {
 	newDirPath := filepath.Join(commandInput.cwd, dirName)
 	err = os.Mkdir(newDirPath, os.FileMode(permissions))
 	return commandInput.cwd, err
+}
+
+func MakeFile(commandInput CommandInput) (wd string, err error) {
+	fmt.Print(colors.Green, "Name of the file with extension: ", colors.Reset)
+	var fileName string
+	for fileName == "" {
+		fmt.Scanln(&fileName)
+	}
+
+	filePath := filepath.Join(commandInput.cwd, fileName)
+	file, err := os.Create(filePath)
+	if err != nil {
+		return commandInput.cwd, err
+	}
+	defer file.Close()
+
+	return commandInput.cwd, nil
 }
