@@ -16,11 +16,12 @@ var (
 	MAX_FILE_SIZE_TO_READ = 5120
 	PATH_TO_VSCODE        = `C:\Users\ysayo\AppData\Local\Programs\Microsoft VS Code\Code.exe`
 	commands              = map[string]func(commandInput CommandInput) (wd string, err error){
-		"od":   OpenDir,    // opens directory
-		"of":   OpenFile,   //opens file
-		"exit": Exit,       // exit file-manager
-		"back": BackDir,    // back on tree, as `cd ..`
-		"code": LaunchCode, // launch vs code in the cwd
+		"od":    OpenDir,    // opens directory
+		"of":    OpenFile,   //opens file
+		"exit":  Exit,       // exit file-manager
+		"back":  BackDir,    // back on tree, as `cd ..`
+		"code":  LaunchCode, // launch vs code in the cwd
+		"mkdir": MakeDir,
 	}
 )
 
@@ -126,4 +127,35 @@ func LaunchCode(commandInput CommandInput) (wd string, err error) {
 		return commandInput.cwd, fmt.Errorf("path to code is invalid, edit config")
 	}
 	return commandInput.cwd, nil
+}
+
+func MakeDir(commandInput CommandInput) (wd string, err error) {
+	fmt.Print(colors.Green, "Name of the directory: ", colors.Reset)
+	var dirName string
+	for dirName == "" {
+		fmt.Scanln(&dirName)
+	}
+
+	fmt.Print("\n", colors.Green, "Should it be available to read?(y - yes):  ", colors.Reset)
+	var readMode string
+	fmt.Scanln(&readMode)
+
+	fmt.Print("\n", colors.Green, "Should it be available to write?(y - yes):  ", colors.Reset)
+	var writeMode string
+	fmt.Scanln(&writeMode)
+
+	permissions := 0
+	if readMode == "y" {
+		permissions += 4
+	}
+	if writeMode == "y" {
+		permissions += 2
+	}
+	if permissions == 0 {
+		return commandInput.cwd, fmt.Errorf("directory can't be created without any permissions")
+	}
+
+	newDirPath := filepath.Join(commandInput.cwd, dirName)
+	err = os.Mkdir(newDirPath, os.FileMode(permissions))
+	return commandInput.cwd, err
 }
