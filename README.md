@@ -34,3 +34,5 @@ filemanager help
 - `of<index>` - Open File
 - `back` - move back by directory, as cd ..
 - `code` - launch Visual Studio Code in current workind directory
+- `mkdir` - create directory in cwd
+- `mkfile` - create file in cwd
