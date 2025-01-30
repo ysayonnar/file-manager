@@ -6,6 +6,7 @@ import (
 	"file-manager/internal/utils"
 	"fmt"
 	"os"
+	"strings"
 )
 
 var (
@@ -84,6 +85,13 @@ func ShowDirs(cwd string) (*commandparser.Catalog, error) {
 		fmt.Print("- ", colors.Purple, fmt.Sprintf("%3d", i+1), " ", colors.Reset, dir.Name(), "\n")
 	}
 
+	maxNameLength := 0
+	for _, file := range files {
+		if len(file.Name()) > maxNameLength {
+			maxNameLength = len(file.Name())
+		}
+	}
+
 	for i, file := range files {
 		info := file.Name()
 
@@ -100,8 +108,7 @@ func ShowDirs(cwd string) (*commandparser.Catalog, error) {
 			ctr++
 		}
 
-		info += fmt.Sprintf(" <-%.1f%s", size, fileSizes[ctr])
-
+		info += strings.Repeat(" ", maxNameLength-len(file.Name())) + "  <--  " + fileInfo.ModTime().Format("02 January 2006") + fmt.Sprintf("\t%.1f%s", size, fileSizes[ctr])
 		fmt.Print("- ", colors.Green, fmt.Sprintf("%3d", i+1), " ", colors.Reset, info, "\n")
 	}
 
