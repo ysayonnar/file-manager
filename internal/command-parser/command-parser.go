@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -13,11 +14,13 @@ import (
 
 var (
 	MAX_FILE_SIZE_TO_READ = 5120
+	PATH_TO_VSCODE        = `C:\Users\ysayo\AppData\Local\Programs\Microsoft VS Code\Code.exe`
 	commands              = map[string]func(commandInput CommandInput) (wd string, err error){
-		"od":   OpenDir,
-		"of":   OpenFile,
-		"exit": Exit,
-		"back": BackDir,
+		"od":   OpenDir,    // opens directory
+		"of":   OpenFile,   //opens file
+		"exit": Exit,       // exit file-manager
+		"back": BackDir,    // back on tree, as `cd ..`
+		"code": LaunchCode, // launch vs code in the cwd
 	}
 )
 
@@ -113,5 +116,14 @@ func OpenFile(commandInput CommandInput) (wd string, err error) {
 	fmt.Print("\n", colors.LightBlue, colors.Underline, "Use `Enter` to exit read mode", colors.Reset, "\n")
 	fmt.Scanln(&exitSignal)
 
+	return commandInput.cwd, nil
+}
+
+func LaunchCode(commandInput CommandInput) (wd string, err error) {
+	cmd := exec.Command(PATH_TO_VSCODE, commandInput.cwd)
+	err = cmd.Run()
+	if err != nil {
+		return commandInput.cwd, fmt.Errorf("path to code is invalid, edit config")
+	}
 	return commandInput.cwd, nil
 }
