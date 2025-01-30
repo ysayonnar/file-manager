@@ -54,8 +54,6 @@ func RenderWindow(cwd string) error {
 		utils.ClearScreen()
 		utils.ClearStdin()
 	}
-
-	return nil
 }
 
 func ShowDirs(cwd string) (*commandparser.Catalog, error) {
