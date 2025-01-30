@@ -83,7 +83,7 @@ func ShowDirs(cwd string) (*commandparser.Catalog, error) {
 
 	fmt.Print("\n")
 	for i, dir := range dirs {
-		fmt.Print("- ", colors.Purple, i+1, " ", colors.Reset, dir.Name(), "\n")
+		fmt.Print("- ", colors.Purple, fmt.Sprintf("%3d", i+1), " ", colors.Reset, dir.Name(), "\n")
 	}
 
 	for i, file := range files {
@@ -104,7 +104,7 @@ func ShowDirs(cwd string) (*commandparser.Catalog, error) {
 
 		info += fmt.Sprintf(" <-%.1f%s", size, fileSizes[ctr])
 
-		fmt.Print("- ", colors.Green, i+1, " ", colors.Reset, info, "\n")
+		fmt.Print("- ", colors.Green, fmt.Sprintf("%3d", i+1), " ", colors.Reset, info, "\n")
 	}
 
 	return &commandparser.Catalog{Files: &files, Dirs: &dirs}, nil
