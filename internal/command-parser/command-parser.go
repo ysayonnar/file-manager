@@ -13,6 +13,7 @@ var (
 	commands = map[string]func(commandInput CommandInput) (wd string, err error){
 		"od":   OpenDir,
 		"exit": Exit,
+		"back": BackDir,
 	}
 )
 
@@ -57,7 +58,7 @@ func ParseCommand(cwd string, command string, catalog *Catalog) (wd string, err 
 func OpenDir(commandInput CommandInput) (wd string, err error) {
 	index := commandInput.index
 	if index > len(*commandInput.catalog.Dirs) || index < 1 {
-		return commandInput.cwd, fmt.Errorf("must be index of dir `od<index>`")
+		return commandInput.cwd, fmt.Errorf("invalid index of dir")
 	}
 	dir := (*commandInput.catalog.Dirs)[index-1]
 	wd = filepath.Join(commandInput.cwd, dir.Name())
@@ -68,4 +69,9 @@ func Exit(commandInput CommandInput) (wd string, err error) {
 	fmt.Println("Bye-bye!")
 	os.Exit(1)
 	return "", nil
+}
+
+func BackDir(CommandInput CommandInput) (wd string, err error) {
+	wd = filepath.Join(CommandInput.cwd, "..")
+	return wd, nil
 }
