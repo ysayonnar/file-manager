@@ -1,7 +1,9 @@
 package window
 
 import (
+	"bufio"
 	"file-manager/internal/colors"
+	commandparser "file-manager/internal/command-parser"
 	"fmt"
 	"os"
 )
@@ -22,50 +24,103 @@ func CreateWindow() error {
 		return err
 	}
 
-	fmt.Print(colors.LightBlue, "=============YSNR's file manager=============", colors.Reset, "\n")
-	fmt.Print("cwd: ", colors.Underline, cwd, "\n", colors.Reset)
-
-	err = ShowDirs(cwd)
+	err = RenderWindow(cwd)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func RenderWindow(cwd string) error {
+	var commandError error
+	for {
+		fmt.Print(colors.LightBlue, "=============YSNR's file manager=============", colors.Reset, "\n")
+		fmt.Print("cwd: ", colors.Underline, cwd, "\n", colors.Reset)
+
+		catalog, err := ShowDirs(cwd)
+		if err != nil {
+			return err
+		}
+
+		if commandError != nil {
+			fmt.Print("\n", colors.Red, "Error: ", commandError.Error(), colors.Reset, "\n")
+		}
+
+		var command string
+		fmt.Print(colors.LightBlue, "\nCommand prompt: ", colors.Reset)
+		fmt.Scanln(&command)
+		cwd, commandError = commandparser.ParseCommand(cwd, command, catalog)
+
+		clearScreen()
+		clearStdin()
 	}
 
 	return nil
 }
 
-func ShowDirs(cwd string) error {
+func ShowDirs(cwd string) (*commandparser.Catalog, error) {
 	dir, err := os.Open(cwd)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//пока и файлы и директории, сделать регулируемо дело пяти минут
 	entities, err := dir.ReadDir(0) // 0 чтобы получить все сущности
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	dirs := []os.DirEntry{}
+	files := []os.DirEntry{}
+
+	for _, entity := range entities {
+		if entity.IsDir() {
+			dirs = append(dirs, entity)
+		} else {
+			files = append(files, entity)
+		}
 	}
 
 	fmt.Print("\n")
-	for _, entity := range entities {
-		info := entity.Name()
-		if !entity.IsDir() {
-			fileInfo, err := entity.Info()
-			if err != nil {
-				return err
-			}
-
-			//считаю размер
-			size := float32(fileInfo.Size())
-			ctr := 0
-			for size > 1024 {
-				size /= 1024
-				ctr++
-			}
-
-			info += fmt.Sprintf(" <-%.1f%s", size, fileSizes[ctr])
-		}
-		fmt.Printf("\t%s\n", info)
+	for i, dir := range dirs {
+		fmt.Print("- ", colors.Purple, i+1, " ", colors.Reset, dir.Name(), "\n")
 	}
 
-	return nil
+	for i, file := range files {
+		info := file.Name()
+
+		fileInfo, err := file.Info()
+		if err != nil {
+			return nil, err
+		}
+
+		//считаю размер
+		size := float32(fileInfo.Size())
+		ctr := 0
+		for size > 1024 {
+			size /= 1024
+			ctr++
+		}
+
+		info += fmt.Sprintf(" <-%.1f%s", size, fileSizes[ctr])
+
+		fmt.Print("- ", colors.Green, i+1, " ", colors.Reset, info, "\n")
+	}
+
+	return &commandparser.Catalog{Files: &files, Dirs: &dirs}, nil
+}
+
+func clearStdin() {
+	reader := bufio.NewReader(os.Stdin)
+	for reader.Buffered() > 0 {
+		reader.ReadByte()
+	}
+}
+
+func clearScreen() {
+	fmt.Print("\033[H\033[2J")
+}
+
+func clearLastLine() {
+	fmt.Print("\033[F\033[K")
 }
