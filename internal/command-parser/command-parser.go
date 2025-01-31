@@ -23,6 +23,8 @@ var (
 		"code":   LaunchCode, // launch vs code in the cwd
 		"mkdir":  MakeDir,
 		"mkfile": MakeFile,
+		"dd":     DeleteDir,
+		"df":     DeleteFile,
 	}
 )
 
@@ -176,4 +178,25 @@ func MakeFile(commandInput CommandInput) (wd string, err error) {
 	defer file.Close()
 
 	return commandInput.cwd, nil
+}
+
+func DeleteFile(commandInput CommandInput) (wd string, err error) {
+	index := commandInput.index
+	if index > len(*commandInput.catalog.Files) || index < 1 {
+		return commandInput.cwd, fmt.Errorf("invalid index of file")
+	}
+	file := (*commandInput.catalog.Files)[index-1]
+	filePath := filepath.Join(commandInput.cwd, file.Name())
+
+	return commandInput.cwd, os.Remove(filePath)
+}
+
+func DeleteDir(commandInput CommandInput) (wd string, err error) {
+	index := commandInput.index
+	if index > len(*commandInput.catalog.Dirs) || index < 1 {
+		return commandInput.cwd, fmt.Errorf("invalid index of dir")
+	}
+	dir := (*commandInput.catalog.Dirs)[index-1]
+	dirPath := filepath.Join(commandInput.cwd, dir.Name())
+	return commandInput.cwd, os.Remove(dirPath)
 }

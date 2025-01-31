@@ -29,10 +29,12 @@ filemanager help
 
 ### List of commands:
 
-- `exit` - Quit file manager
-- `od<index>` - Open Directory
-- `of<index>` - Open File
+- `exit` - quit file manager
+- `od<index>` - open directory
+- `of<index>` - open file
 - `back` - move back by directory, as cd ..
-- `code` - launch Visual Studio Code in current workind directory
+- `code` - launch Visual Studio Code in current working directory
 - `mkdir` - create directory in cwd
 - `mkfile` - create file in cwd
+- `dd<index>` - delete dir
+- `df<index>` - delete file

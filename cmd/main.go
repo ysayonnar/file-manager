@@ -18,6 +18,8 @@ func main() {
 	code - launch Visual Studio Code in current workind directory
 	mkdir - create directory in cwd
 	mkfile - create file in cwd
+	dd<index> - delete dir
+	df<index> - delete file
 			`)
 		} else {
 			fmt.Println("invalid prompt")
