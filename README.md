@@ -7,7 +7,7 @@ Self-written TUI file manager inspired by Vim text editor. Command prompt like V
 
 1. Install Golang
 2. Clone repository
-3. Configure file manager. Move to `filemanager/internal/commamd-parser/ command-parser.go` and set your values into following settings:
+3. Configure file manager. Move to `filemanager/internal/commamd-parser/command-parser.go` and set your values into following settings:
 
 - `MAX_FILE_SIZE_TO_READ` - maximum file size in bytes that can be opened
 - `PATH_TO_VSCODE` - path to your executable text editor, vs code for example
