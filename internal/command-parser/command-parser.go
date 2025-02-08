@@ -52,7 +52,6 @@ func ParseCommand(cwd string, command string, catalog *Catalog) (wd string, err 
 			commandCode = append(commandCode, byte(symbol))
 		}
 	}
-
 	if _, ok := commands[string(commandCode)]; !ok {
 		return cwd, fmt.Errorf("unknown command `%s`", command)
 	}
