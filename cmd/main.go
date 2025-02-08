@@ -20,6 +20,8 @@ func main() {
 	mkfile - create file in cwd
 	dd<index> - delete dir
 	df<index> - delete file
+	rnd<index> - rename dir
+	rnf<index> - rename file
 			`)
 		} else {
 			fmt.Println("invalid prompt")
