@@ -118,7 +118,6 @@ func OpenFile(commandInput CommandInput) (wd string, err error) {
 	var exitSignal string
 	fmt.Print("\n", colors.LightBlue, colors.Underline, "Use `Enter` to exit read mode", colors.Reset, "\n")
 	fmt.Scanln(&exitSignal)
-
 	return commandInput.cwd, nil
 }
 
