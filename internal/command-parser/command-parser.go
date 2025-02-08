@@ -1,6 +1,7 @@
 package commandparser
 
 import (
+	"errors"
 	"file-manager/internal/colors"
 	"file-manager/internal/utils"
 	"fmt"
@@ -21,10 +22,12 @@ var (
 		"exit":   Exit,       // exit file-manager
 		"back":   BackDir,    // back on tree, as `cd ..`
 		"code":   LaunchCode, // launch vs code in the cwd
-		"mkdir":  MakeDir,
-		"mkfile": MakeFile,
-		"dd":     DeleteDir,
-		"df":     DeleteFile,
+		"mkdir":  MakeDir,    // make-dir
+		"mkfile": MakeFile,   //make-file
+		"dd":     DeleteDir,  //delete-dir
+		"df":     DeleteFile, //delete-file
+		"rnf":    RenameFile, //rename-file
+		"rnd":    RenameDir,  //rename-dir
 	}
 )
 
@@ -197,4 +200,39 @@ func DeleteDir(commandInput CommandInput) (wd string, err error) {
 	dir := (*commandInput.catalog.Dirs)[index-1]
 	dirPath := filepath.Join(commandInput.cwd, dir.Name())
 	return commandInput.cwd, os.Remove(dirPath)
+}
+
+// TODO: переписать ошибки с fmt.Errorf на errors.New
+func RenameFile(commandInput CommandInput) (wd string, err error) {
+	index := commandInput.index
+	if index > len(*commandInput.catalog.Files) || index < 1 {
+		return commandInput.cwd, errors.New("invalid index of file")
+	}
+
+	var newFileName string
+	fmt.Print(colors.Green, "\nEnter new file name with extension: ", colors.Reset)
+	for newFileName == "" {
+		fmt.Scanln(&newFileName)
+	}
+	newFilePath := filepath.Join(commandInput.cwd, newFileName)
+	oldFilePath := filepath.Join(commandInput.cwd, (*commandInput.catalog.Files)[index-1].Name())
+
+	return commandInput.cwd, os.Rename(oldFilePath, newFilePath)
+}
+
+func RenameDir(commandInput CommandInput) (wd string, err error) {
+	index := commandInput.index
+	if index > len(*commandInput.catalog.Dirs) || index < 1 {
+		return commandInput.cwd, errors.New("invalid index of dir")
+	}
+
+	var newDirname string
+	fmt.Print(colors.Green, "\nEnter new dir name: ", colors.Reset)
+	for newDirname == "" {
+		fmt.Scanln(&newDirname)
+	}
+	newDirPath := filepath.Join(commandInput.cwd, newDirname)
+	oldDirPath := filepath.Join(commandInput.cwd, (*commandInput.catalog.Dirs)[index-1].Name())
+
+	return commandInput.cwd, os.Rename(oldDirPath, newDirPath)
 }
